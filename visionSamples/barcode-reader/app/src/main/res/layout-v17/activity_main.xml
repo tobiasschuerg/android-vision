@@ -54,4 +54,13 @@
         android:layout_alignEnd="@+id/barcode_value"
         android:checked="false" />
 
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/instant_return"
+        android:id="@+id/instant_return"
+        android:layout_alignBottom="@id/auto_focus"
+        android:layout_toEndOf="@id/auto_focus"
+        android:checked="false" />
+
 </RelativeLayout>

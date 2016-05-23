@@ -41,6 +41,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private static final int RC_BARCODE_CAPTURE = 9001;
     private static final String TAG = "BarcodeMain";
+    private CompoundButton instantReturn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +50,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         statusMessage = (TextView)findViewById(R.id.status_message);
         barcodeValue = (TextView)findViewById(R.id.barcode_value);
+        instantReturn = (CompoundButton) findViewById(R.id.instant_return);
 
         autoFocus = (CompoundButton) findViewById(R.id.auto_focus);
         useFlash = (CompoundButton) findViewById(R.id.use_flash);
@@ -68,6 +70,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             Intent intent = new Intent(this, BarcodeCaptureActivity.class);
             intent.putExtra(BarcodeCaptureActivity.AutoFocus, autoFocus.isChecked());
             intent.putExtra(BarcodeCaptureActivity.UseFlash, useFlash.isChecked());
+            intent.putExtra(BarcodeCaptureActivity.INSTANT_RETURN, instantReturn.isChecked());
 
             startActivityForResult(intent, RC_BARCODE_CAPTURE);
         }

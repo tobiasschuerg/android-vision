@@ -69,6 +69,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
     // constants used to pass extra data in the intent
     public static final String AutoFocus = "AutoFocus";
     public static final String UseFlash = "UseFlash";
+    public static final String INSTANT_RETURN = "InstantReturn";
     public static final String BarcodeObject = "Barcode";
 
     private CameraSource mCameraSource;
@@ -78,6 +79,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
     // helper objects for detecting taps and pinches.
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
+    private boolean instantReturnBarcode = false;
 
     /**
      * Initializes the UI and creates the detector pipeline.
@@ -93,6 +95,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
         // read parameters from the intent used to launch the activity.
         boolean autoFocus = getIntent().getBooleanExtra(AutoFocus, false);
         boolean useFlash = getIntent().getBooleanExtra(UseFlash, false);
+        instantReturnBarcode = getIntent().getBooleanExtra(INSTANT_RETURN, false);
 
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
@@ -169,7 +172,14 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
         // graphics for each barcode on screen.  The factory is used by the multi-processor to
         // create a separate tracker instance for each barcode.
         BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(context).build();
-        BarcodeTrackerFactory barcodeFactory = new BarcodeTrackerFactory(mGraphicOverlay);
+        BarcodeTrackerFactory barcodeFactory = new BarcodeTrackerFactory(mGraphicOverlay) {
+            @Override
+            void onBarcodeDetected(Barcode barcode) {
+                if (instantReturnBarcode) {
+                    returnBarcode(barcode);
+                }
+            }
+        };
         barcodeDetector.setProcessor(
                 new MultiProcessor.Builder<>(barcodeFactory).build());
 
@@ -339,20 +349,23 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
         Barcode barcode = null;
         if (graphic != null) {
             barcode = graphic.getBarcode();
-            if (barcode != null) {
-                Intent data = new Intent();
-                data.putExtra(BarcodeObject, barcode);
-                setResult(CommonStatusCodes.SUCCESS, data);
-                finish();
-            }
-            else {
-                Log.d(TAG, "barcode data is null");
-            }
+            returnBarcode(barcode);
         }
         else {
             Log.d(TAG,"no barcode detected");
         }
         return barcode != null;
+    }
+
+    private void returnBarcode(Barcode barcode) {
+        if (barcode != null) {
+            Intent data = new Intent();
+            data.putExtra(BarcodeObject, barcode);
+            setResult(CommonStatusCodes.SUCCESS, data);
+            finish();
+        } else {
+            Log.d(TAG, "barcode data is null");
+        }
     }
 
     private class CaptureGestureListener extends GestureDetector.SimpleOnGestureListener {
